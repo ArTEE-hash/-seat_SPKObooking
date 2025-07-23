@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ระบบจองที่นั่งตรวจราชการ</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f3f3f3;
+    }
+    header {
+      text-align: center;
+      background-color: #e0f2f1;
+      padding: 20px;
+    }
+    header img {
+      height: 80px;
+    }
+    header h1 {
+      margin-top: 10px;
+      font-size: 1.2rem;
+      color: #00695c;
+    }
+    main {
+      padding: 20px;
+    }
+    #seat-map {
+      margin: 20px auto;
+      max-width: 400px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      justify-items: center;
+    }
+    .seat {
+      width: 40px;
+      height: 40px;
+      background-color: #b2dfdb;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      font-weight: bold;
+      color: #004d40;
+      border: 2px solid transparent;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    .seat:hover {
+      background-color: #80cbc4;
+    }
+    .seat.booked {
+      background-color: #cfd8dc;
+      cursor: not-allowed;
+      color: #757575;
+    }
+    .seat.selected {
+      border-color: #00796b;
+      background-color: #004d40;
+      color: white;
+    }
+    #booking-form {
+      max-width: 400px;
+      margin: 20px auto;
+      background: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px #aaa;
+      display: none;
+    }
+    #booking-form label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    #booking-form input[type="text"] {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 1rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    #booking-form button {
+      margin-top: 15px;
+      padding: 8px 12px;
+      background-color: #00695c;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    #booking-form button:hover {
+      background-color: #004d40;
+    }
+    #booking-form .btn-cancel {
+      background-color: #b71c1c;
+      margin-left: 10px;
+    }
+    #booking-form .btn-cancel:hover {
+      background-color: #7f0000;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="logo MOPH.png" alt="โลโก้กระทรวงสาธารณสุข">
+    <h1>ระบบจองที่นั่งตรวจราชการและนิเทศงาน<br>จังหวัดสมุทรปราการ</h1>
+  </header>
+
+  <main>
+    <p>กรุณาเลือกที่นั่งจากผังเพื่อดูข้อมูลการจอง</p>
+    <div id="seat-map">
+      <!-- สร้างที่นั่ง 7 โต๊ะ x 3 คน -->
+    </div>
+
+    <form id="booking-form">
+      <h3>จองที่นั่ง: <span id="selected-seat-label"></span></h3>
+      <label for="name">ชื่อ-นามสกุล</label>
+      <input type="text" id="name" name="name" required />
+      <label for="department">หน่วยงาน</label>
+      <input type="text" id="department" name="department" required />
+      <button type="submit">ยืนยันจอง</button>
+      <button type="button" class="btn-cancel">ยกเลิก</button>
+    </form>
+  </main>
+
+  <script>
+    // ข้อมูลจองเก็บใน localStorage ใช้ key นี้
+    const STORAGE_KEY = 'bookingData';
+
+    // สร้างผังที่นั่ง: 7 โต๊ะ x 3 ที่นั่ง = 21 ที่นั่ง
+    // สมมติเลขที่นั่งเป็น A1-A3, B1-B3 ... G1-G3 (7 โต๊ะ A-G)
+    const seatMap = document.getElementById('seat-map');
+    const rows = ['A','B','C','D','E','F','G'];
+    const seatsPerRow = 3;
+    let selectedSeat = null;
+
+    // โหลดข้อมูลการจองจาก localStorage
+    function loadBookedSeats() {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      document.querySelectorAll('.seat').forEach(seatEl => {
+        const seatId = seatEl.dataset.seatId;
+        if (data[seatId]) {
+          seatEl.classList.add('booked');
+          seatEl.title = `จองโดย: ${data[seatId].name}\nหน่วยงาน: ${data[seatId].department}`;
+          seatEl.textContent = seatId;
+        } else {
+          seatEl.classList.remove('booked');
+          seatEl.title = '';
+          seatEl.textContent = seatId;
+        }
+      });
+    }
+
+    // สร้างที่นั่ง
+    function createSeatMap() {
+      seatMap.innerHTML = '';
+      rows.forEach(row => {
+        for (let i=1; i <= seatsPerRow; i++) {
+          const seatId = `${row}${i}`;
+          const seatEl = document.createElement('div');
+          seatEl.classList.add('seat');
+          seatEl.dataset.seatId = seatId;
+          seatEl.textContent = seatId;
+          seatEl.addEventListener('click', () => {
+            if (seatEl.classList.contains('booked')) return;
+            if (selectedSeat) selectedSeat.classList.remove('selected');
+            selectedSeat = seatEl;
+            seatEl.classList.add('selected');
+            bookingForm.style.display = 'block';
+            document.getElementById('selected-seat-label').textContent = seatId;
+          });
+          seatMap.appendChild(seatEl);
+        }
+      });
+    }
+
+    const bookingForm = document.getElementById('booking-form');
+
+    bookingForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!selectedSeat) return alert('กรุณาเลือกที่นั่งก่อนจอง');
+      const name = bookingForm.name.value.trim();
+      const department = bookingForm.department.value.trim();
+      if (!name || !department) return alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+      // บันทึกข้อมูลลง localStorage
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const seatId = selectedSeat.dataset.seatId;
+      data[seatId] = { name, department };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      alert(`จองที่นั่ง ${seatId} สำเร็จ`);
+      bookingForm.reset();
+      bookingForm.style.display = 'none';
+      selectedSeat.classList.remove('selected');
+      selectedSeat.classList.add('booked');
+      selectedSeat.title = `จองโดย: ${name}\nหน่วยงาน: ${department}`;
+      selectedSeat = null;
+    });
+
+    bookingForm.querySelector('.btn-cancel').addEventListener('click', () => {
+      bookingForm.style.display = 'none';
+      if (selectedSeat) selectedSeat.classList.remove('selected');
+      selectedSeat = null;
+    });
+
+    createSeatMap();
+    loadBookedSeats();
+
+  </script>
+
+</body>
+</html>
