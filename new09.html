@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนผังที่นั่ง - ร้อยรักจากใจ...สายใยผูกพัน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #24243e 25%, #302b63 50%, #8360c3 75%, #2ebf91 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+            overflow-x: auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 40px rgba(31, 38, 135, 0.4);
+            overflow: hidden;
+            padding: 40px;
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            padding: 40px;
+            text-align: center;
+            color: white;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            transform: perspective(1000px) rotateX(2deg);
+        }
+
+        .header h1 {
+            font-size: clamp(24px, 5vw, 42px);
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header h2 {
+            font-size: clamp(18px, 4vw, 28px);
+            margin: 15px 0;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: clamp(14px, 3vw, 18px);
+            opacity: 0.95;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+        }
+
+        .agency-select-container {
+            position: relative;
+        }
+
+        .agency-select {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+            min-width: 250px;
+        }
+
+        .agency-select:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(16, 185, 129, 0.6);
+        }
+
+        .agency-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .agency-dropdown.show {
+            display: block;
+            animation: dropdownSlide 0.3s ease;
+        }
+
+        @keyframes dropdownSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .agency-option {
+            padding: 12px 20px;
+            color: #1f2937;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .agency-option:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .agency-option:last-child {
+            border-bottom: none;
+        }
+
+        .stage-area {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .stage {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            border: 4px solid #4a90e2;
+            border-radius: 25px;
+            padding: 40px;
+            margin: 0 auto;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+
+        .stage::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 30%, rgba(255, 255, 255, 0.2) 60%, transparent 80%);
+            border-radius: 50%;
+            animation: spotlight 4s ease-in-out infinite;
+        }
+
+        @keyframes spotlight {
+            0%, 100% { 
+                opacity: 0.7; 
+                transform: translate(-50%, -50%) scale(1);
+                filter: blur(0px);
+            }
+            50% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1.3);
+                filter: blur(2px);
+            }
+        }
+
+        .stage h3 {
+            font-size: clamp(20px, 4vw, 32px);
+            font-weight: 700;
+            color: white;
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .seating-sections {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 25px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+        }
+
+        .seating-sections .section {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+            padding: 20px 0;
+        }
+
+        .section {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .section h4 {
+            color: #ffffff;
+            text-align: center;
+            font-size: clamp(18px, 4vw, 24px);
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .vip-section .table-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .vip-table {
+            background: linear-gradient(135deg, #ffd700, #ffed4a);
+            color: #1a1a2e;
+            padding: 25px 50px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: clamp(16px, 4vw, 22px);
+            box-shadow: 0 12px 35px rgba(255, 215, 0, 0.5);
+            text-align: center;
+            min-width: 250px;
+            transform: perspective(800px) rotateY(-5deg);
+            transition: transform 0.3s ease;
+        }
+
+        .vip-table:hover {
+            transform: perspective(800px) rotateY(0deg) translateY(-5px);
+        }
+
+        .general-section .table-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .table-seat {
+            background: linear-gradient(135deg, #4a5568, #2d3748);
+            border-radius: 12px;
+            padding: 10px 8px;
+            text-align: center;
+            font-size: clamp(10px, 2vw, 12px);
+            font-weight: 600;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            overflow: hidden;
+            line-height: 1.2;
+        }
+
+        .table-seat::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .table-seat:hover::before {
+            left: 100%;
+        }
+
+        .table-seat:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .table-seat.spacer {
+            background: transparent !important;
+            border: 2px dashed rgba(255, 255, 255, 0.15) !important;
+            color: rgba(255, 255, 255, 0.3) !important;
+            cursor: default;
+        }
+
+        .table-seat.spacer:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .table-seat.spacer::before {
+            display: none;
+        }
+
+        .table-seat.dimmed {
+            opacity: 0.3;
+            filter: grayscale(0.7);
+        }
+
+        .table-seat.highlighted {
+            opacity: 1;
+            filter: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        .table-id {
+            font-weight: 800;
+            font-size: clamp(11px, 2.5vw, 14px);
+            margin-bottom: 2px;
+        }
+
+        .table-capacity {
+            font-size: clamp(9px, 2vw, 11px);
+            margin-bottom: 2px;
+            color: #a0a0a0;
+            font-weight: 500;
+        }
+
+        .table-agency {
+            font-size: clamp(8px, 1.8vw, 10px);
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        /* Enhanced agency-specific colors with gradients */
+        .agency-สสจ-สมุทรปราการ { 
+            background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706); 
+            color: #1f2937; 
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4);
+        }
+        .agency-รพ-สมุทรปราการ { 
+            background: linear-gradient(135deg, #1e40af, #1d4ed8, #2563eb); 
+            color: white;
+            box-shadow: 0 8px 25px rgba(30, 64, 175, 0.4);
+        }
+        .agency-รพ-บางพลี { 
+            background: linear-gradient(135deg, #0ea5e9, #0284c7, #0369a1); 
+            color: white;
+            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+        }
+        .agency-รพ-พระสมุทรเจดีย์ฯ { 
+            background: linear-gradient(135deg, #06b6d4, #0891b2, #0e7490); 
+            color: white;
+            box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
+        }
+        .agency-ผู้เกษียณอายุราชการ { 
+            background: linear-gradient(135deg, #db2777, #be185d, #9d174d); 
+            color: white;
+            box-shadow: 0 8px 25px rgba(219, 39, 119, 0.4);
+        }
+        .agency-สสอ-บางพลี { 
+            background: linear-gradient(135deg, #3730a3, #4338ca, #4f46e5); 
+            color: white;
+            box-shadow: 0 8px 25px rgba(55, 48, 163, 0.4);
+        }
+        .agency-สสอ-พระสมุทรเจดีย์ { 
+            background: linear-gradient(135deg, #0891b2, #0e7490, #155e75); 
+            color: white;
+            box-shadow: 0 8px 25px rgba(8, 145, 178, 0.4);
+        }
+        .agency-รพ-บางจาก { 
+            background: linear-gradient(135deg, #dc2626, #b91c1c, #991b1b); 
+            color: white;
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+        }
+        .agency-สสอ-พระประแดง { 
+            background: linear-gradient(135deg, #ea580c, #c2410c, #9a3412); 
+            color: white;
+            box-shadow: 0 8px 25px rgba(234, 88, 12, 0.4);
+        }
+        .agency-รพ-บางบ่อ { 
+            background: linear-gradient(135deg, #ec4899, #db2777, #be185d); 
+            color: white;
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.4);
+        }
+        .agency-สสอ-บางบ่อ { 
+            background: linear-gradient(135deg, #a855f7, #9333ea, #7c3aed); 
+            color: white;
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
+        }
+        .agency-สสอ-บางเสาธง { 
+            background: linear-gradient(135deg, #84cc16, #65a30d, #4d7c0f); 
+            color: white;
+            box-shadow: 0 8px 25px rgba(132, 204, 22, 0.4);
+        }
+        .agency-สสอ-เมือง { 
+            background: linear-gradient(135deg, #fef3c7, #fde68a, #fcd34d); 
+            color: #1f2937;
+            box-shadow: 0 8px 25px rgba(254, 243, 199, 0.4);
+        }
+        .agency-รพ-บางเสาธง { 
+            background: linear-gradient(135deg, #f472b6, #ec4899, #db2777); 
+            color: white;
+            box-shadow: 0 8px 25px rgba(244, 114, 182, 0.4);
+        }
+
+        .entrance {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #6b7280, #4b5563, #374151);
+            border-radius: 15px;
+            color: white;
+            font-weight: 700;
+            font-size: clamp(16px, 3vw, 20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-number {
+            font-size: clamp(24px, 5vw, 36px);
+            font-weight: 800;
+            color: #4facfe;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: clamp(14px, 3vw, 16px);
+            opacity: 0.9;
+        }
+
+        .clear-selection {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            margin-left: 10px;
+        }
+
+        .clear-selection:hover {
+            box-shadow: 0 12px 35px rgba(239, 68, 68, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+            
+            .agency-select {
+                min-width: auto;
+            }
+            
+            .general-section .table-grid {
+                gap: 8px;
+            }
+            
+            .table-seat {
+                min-height: 70px;
+                font-size: 9px;
+                padding: 6px 4px;
+            }
+            
+            .stage {
+                width: 95%;
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .general-section .table-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 4px;
+            }
+            
+            .table-seat {
+                min-height: 60px;
+                padding: 4px 2px;
+                font-size: 8px;
+            }
+            
+            .table-id {
+                font-size: 9px;
+            }
+            
+            .table-capacity {
+                font-size: 7px;
+            }
+            
+            .table-agency {
+                font-size: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="header">
+                <h1>"ร้อยรักจากใจ...สายใยผูกพัน"</h1>
+                <h2>Beautiful Party</h2>
+                <p><strong>วันที่ 19 สิงหาคม 2568</strong></p>
+                <p><strong>เวลา 18.00-22.00 น.</strong></p>
+                <p><strong>PIMARN GRAND BALLROOM</strong></p>
+                <p>ห้องประชุมพิมาน แกรนด์ บอลรูม</p>
+                <p>โรงแรมแกรนด์ พาลาสโซ่ พัทยา จังหวัดชลบุรี</p>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">11</div>
+                    <div class="stat-label">แถวที่นั่ง</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">62</div>
+                    <div class="stat-label">โต๊ะใช้งานได้</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">ที่นั่ง/โต๊ะ</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">521</div>
+                    <div class="stat-label">ที่นั่งรวม</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="toggleTableInfo()">
+                    สลับการแสดงข้อมูลโต๊ะ
+                </button>
+                
+                <div class="agency-select-container">
+                    <button class="agency-select" onclick="toggleAgencyDropdown()">
+                        <span id="selectedAgency">ค้นหาหน่วยงานของท่าน</span>
+                    </button>
+                    <div class="agency-dropdown" id="agencyDropdown">
+                        <div class="agency-option" onclick="filterByAgency('all')">ทั้งหมด</div>
+                        <div class="agency-option" onclick="filterByAgency('สสจ.สมุทรปราการ')">สำนักงานสาธารณสุขจังหวัดสมุทรปราการ</div>
+                        <div class="agency-option" onclick="filterByAgency('รพ.สมุทรปราการ')">โรงพยาบาลสมุทรปราการ</div>
+                        <div class="agency-option" onclick="filterByAgency('รพ.บางพลี')">โรงพยาบาลบางพลี</div>
+                        <div class="agency-option" onclick="filterByAgency('รพ.พระสมุทรเจดีย์ฯ')">โรงพยาบาลพระสมุทรเจดีย์</div>
+                        <div class="agency-option" onclick="filterByAgency('ผู้เกษียณอายุราชการ')">ผู้เกษียณอายุราชการ</div>
+                        <div class="agency-option" onclick="filterByAgency('สสอ.บางพลี')">สำนักงานสาธารณสุขอำเภอบางพลี</div>
+                        <div class="agency-option" onclick="filterByAgency('สสอ.พระสมุทรเจดีย์')">สำนักงานสาธารณสุขอำเภอพระสมุทรเจดีย์</div>
+                        <div class="agency-option" onclick="filterByAgency('รพ.บางจาก')">โรงพยาบาลบางจาก</div>
+                        <div class="agency-option" onclick="filterByAgency('สสอ.พระประแดง')">สำนักงานสาธารณสุขอำเภอพระประแดง</div>
+                        <div class="agency-option" onclick="filterByAgency('รพ.บางบ่อ')">โรงพยาบาลบางบ่อ</div>
+                        <div class="agency-option" onclick="filterByAgency('สสอ.บางบ่อ')">สำนักงานสาธารณสุขอำเภอบางบ่อ</div>
+                        <div class="agency-option" onclick="filterByAgency('สสอ.บางเสาธง')">สำนักงานสาธารณสุขอำเภอบางเสาธง</div>
+                        <div class="agency-option" onclick="filterByAgency('สสอ.เมืองสมุทรปราการ')">สำนักงานสาธารณสุขอำเภอเมืองสมุทรปราการ</div>
+                        <div class="agency-option" onclick="filterByAgency('รพ.บางเสาธง')">โรงพยาบาลบางเสาธง</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="seating-sections">
+                <!-- Stage Area -->
+                <div class="stage-area">
+                    <div class="stage">
+                        <h3>เวที / Stage</h3>
+                    </div>
+                </div>
+
+                <!-- VIP Section -->
+                <div class="section vip-section">
+                    <h4>VIP Section</h4>
+                    <div class="table-container">
+                        <div class="vip-table">
+                            <div>โต๊ะ VIP (A01)</div>
+                            <div style="font-size: 14px; margin-top: 8px; font-weight: 600;">25 ที่นั่ง</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- General Section -->
+                <div class="section general-section">
+                    <h4>โซนทั่วไป (General Seating)</h4>
+                    <div class="table-grid" id="generalTables">
+                        <!-- Tables will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entrance -->
+            <div class="entrance">
+                ทางเข้า-ออก / Entrance-Exit
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let showDetailedInfo = false;
+        let selectedAgency = 'all';
+
+        // Generate random available seats for demonstration
+        function getRandomAvailableSeats() {
+            return Math.floor(Math.random() * 4) + Math.floor(Math.random() * 5); // 0-7 available seats
+        }
+
+        function toggleAgencyDropdown() {
+            const dropdown = document.getElementById('agencyDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function filterByAgency(agency) {
+            selectedAgency = agency;
+            const selectedText = document.getElementById('selectedAgency');
+            
+            if (agency === 'all') {
+                selectedText.textContent = 'ค้นหาหน่วยงานของท่าน';
+            } else {
+                // Shorten agency name for display
+                let shortName = agency;
+                if (agency.includes('สำนักงานสาธารณสุขจังหวัด')) {
+                    shortName = agency.replace('สำนักงานสาธารณสุขจังหวัด', 'สสจ.');
+                } else if (agency.includes('สำนักงานสาธารณสุขอำเภอ')) {
+                    shortName = agency.replace('สำนักงานสาธารณสุขอำเภอ', 'สสอ.');
+                } else if (agency.includes('โรงพยาบาล')) {
+                    shortName = agency.replace('โรงพยาบาล', 'รพ.');
+                }
+                selectedText.textContent = shortName;
+            }
+            
+            document.getElementById('agencyDropdown').classList.remove('show');
+            generateTables();
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const container = document.querySelector('.agency-select-container');
+            const dropdown = document.getElementById('agencyDropdown');
+            
+            if (!container.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Generate the table layout
+        function generateTables() {
+            const container = document.getElementById('generalTables');
+            const spacerPositions = [3, 10, 17, 24, 31, 38, 45, 52, 59, 66, 73];
+            const emptyTableIds = ['C61', 'C62', 'C63', 'C66'];
+            
+            const tableAssignments = {
+                'C01': { agency: 'สสจ.สมุทรปราการ', class: 'agency-สสจ-สมุทรปราการ', fullName: 'สำนักงานสาธารณสุขจังหวัดสมุทรปราการ' },
+                'C07': { agency: 'สสจ.สมุทรปราการ', class: 'agency-สสจ-สมุทรปราการ', fullName: 'สำนักงานสาธารณสุขจังหวัดสมุทรปราการ' },
+                'C13': { agency: 'สสจ.สมุทรปราการ', class: 'agency-สสจ-สมุทรปราการ', fullName: 'สำนักงานสาธารณสุขจังหวัดสมุทรปราการ' },
+                'C19': { agency: 'สสจ.สมุทรปราการ', class: 'agency-สสจ-สมุทรปราการ', fullName: 'สำนักงานสาธารณสุขจังหวัดสมุทรปราการ' },
+                'C25': { agency: 'สสจ.สมุทรปราการ', class: 'agency-สสจ-สมุทรปราการ', fullName: 'สำนักงานสาธารณสุขจังหวัดสมุทรปราการ' },
+                'C31': { agency: 'สสจ.สมุทรปราการ', class: 'agency-สสจ-สมุทรปราการ', fullName: 'สำนักงานสาธารณสุขจังหวัดสมุทรปราการ' },
+                'C37': { agency: 'สสจ.สมุทรปราการ', class: 'agency-สสจ-สมุทรปราการ', fullName: 'สำนักงานสาธารณสุขจังหวัดสมุทรปราการ' },
+                'C43': { agency: 'สสจ.สมุทรปราการ', class: 'agency-สสจ-สมุทรปราการ', fullName: 'สำนักงานสาธารณสุขจังหวัดสมุทรปราการ' },
+                'C44': { agency: 'สสจ.สมุทรปราการ', class: 'agency-สสจ-สมุทรปราการ', fullName: 'สำนักงานสาธารณสุขจังหวัดสมุทรปราการ' },
+                'C49': { agency: 'สสจ.สมุทรปราการ', class: 'agency-สสจ-สมุทรปราการ', fullName: 'สำนักงานสาธารณสุขจังหวัดสมุทรปราการ' },
+                'C50': { agency: 'สสจ.สมุทรปราการ', class: 'agency-สสจ-สมุทรปราการ', fullName: 'สำนักงานสาธารณสุขจังหวัดสมุทรปราการ' },
+                'C55': { agency: 'สสจ.สมุทรปราการ', class: 'agency-สสจ-สมุทรปราการ', fullName: 'สำนักงานสาธารณสุขจังหวัดสมุทรปราการ' },
+                'C56': { agency: 'สสจ.สมุทรปราการ', class: 'agency-สสจ-สมุทรปราการ', fullName: 'สำนักงานสาธารณสุขจังหวัดสมุทรปราการ' },
+                
+                'C02': { agency: 'รพ.สมุทรปราการ', class: 'agency-รพ-สมุทรปราการ', fullName: 'โรงพยาบาลสมุทรปราการ' },
+                'C08': { agency: 'รพ.สมุทรปราการ', class: 'agency-รพ-สมุทรปราการ', fullName: 'โรงพยาบาลสมุทรปราการ' },
+                
+                'C14': { agency: 'รพ.บางพลี', class: 'agency-รพ-บางพลี', fullName: 'โรงพยาบาลบางพลี' },
+                'C20': { agency: 'รพ.บางพลี', class: 'agency-รพ-บางพลี', fullName: 'โรงพยาบาลบางพลี' },
+                'C26': { agency: 'รพ.บางพลี', class: 'agency-รพ-บางพลี', fullName: 'โรงพยาบาลบางพลี' },
+                
+                'C32': { agency: 'รพ.พระสมุทรเจดีย์ฯ', class: 'agency-รพ-พระสมุทรเจดีย์ฯ', fullName: 'โรงพยาบาลพระสมุทรเจดีย์' },
+                'C38': { agency: 'รพ.พระสมุทรเจดีย์ฯ', class: 'agency-รพ-พระสมุทรเจดีย์ฯ', fullName: 'โรงพยาบาลพระสมุทรเจดีย์' },
+                
+                'C03': { agency: 'ผู้เกษียณอายุราชการ', class: 'agency-ผู้เกษียณอายุราชการ', fullName: 'ผู้เกษียณอายุราชการ' },
+                'C04': { agency: 'ผู้เกษียณอายุราชการ', class: 'agency-ผู้เกษียณอายุราชการ', fullName: 'ผู้เกษียณอายุราชการ' },
+                'C09': { agency: 'ผู้เกษียณอายุราชการ', class: 'agency-ผู้เกษียณอายุราชการ', fullName: 'ผู้เกษียณอายุราชการ' },
+                'C10': { agency: 'ผู้เกษียณอายุราชการ', class: 'agency-ผู้เกษียณอายุราชการ', fullName: 'ผู้เกษียณอายุราชการ' },
+                'C15': { agency: 'ผู้เกษียณอายุราชการ', class: 'agency-ผู้เกษียณอายุราชการ', fullName: 'ผู้เกษียณอายุราชการ' },
+                'C16': { agency: 'ผู้เกษียณอายุราชการ', class: 'agency-ผู้เกษียณอายุราชการ', fullName: 'ผู้เกษียณอายุราชการ' },
+                'C21': { agency: 'ผู้เกษียณอายุราชการ', class: 'agency-ผู้เกษียณอายุราชการ', fullName: 'ผู้เกษียณอายุราชการ' },
+                'C22': { agency: 'ผู้เกษียณอายุราชการ', class: 'agency-ผู้เกษียณอายุราชการ', fullName: 'ผู้เกษียณอายุราชการ' },
+                
+                'C28': { agency: 'รพ.บางจาก', class: 'agency-รพ-บางจาก', fullName: 'โรงพยาบาลบางจาก' },
+                'C34': { agency: 'รพ.บางจาก', class: 'agency-รพ-บางจาก', fullName: 'โรงพยาบาลบางจาก' },
+                'C40': { agency: 'รพ.บางจาก', class: 'agency-รพ-บางจาก', fullName: 'โรงพยาบาลบางจาก' },
+                
+                'C46': { agency: 'สสอ.พระประแดง', class: 'agency-สสอ-พระประแดง', fullName: 'สำนักงานสาธารณสุขอำเภอพระประแดง' },
+                'C52': { agency: 'สสอ.พระประแดง', class: 'agency-สสอ-พระประแดง', fullName: 'สำนักงานสาธารณสุขอำเภอพระประแดง' },
+                'C58': { agency: 'สสอ.พระประแดง', class: 'agency-สสอ-พระประแดง', fullName: 'สำนักงานสาธารณสุขอำเภอพระประแดง' },
+                'C64': { agency: 'สสอ.พระประแดง', class: 'agency-สสอ-พระประแดง', fullName: 'สำนักงานสาธารณสุขอำเภอพระประแดง' },
+                'C65': { agency: 'สสอ.พระประแดง', class: 'agency-สสอ-พระประแดง', fullName: 'สำนักงานสาธารณสุขอำเภอพระประแดง' },
+                
+                'C05': { agency: 'รพ.บางบ่อ', class: 'agency-รพ-บางบ่อ', fullName: 'โรงพยาบาลบางบ่อ' },
+                'C11': { agency: 'รพ.บางบ่อ', class: 'agency-รพ-บางบ่อ', fullName: 'โรงพยาบาลบางบ่อ' },
+                'C17': { agency: 'รพ.บางบ่อ', class: 'agency-รพ-บางบ่อ', fullName: 'โรงพยาบาลบางบ่อ' },
+                'C23': { agency: 'รพ.บางบ่อ', class: 'agency-รพ-บางบ่อ', fullName: 'โรงพยาบาลบางบ่อ' },
+                
+                'C29': { agency: 'สสอ.บางบ่อ', class: 'agency-สสอ-บางบ่อ', fullName: 'สำนักงานสาธารณสุขอำเภอบางบ่อ' },
+                'C35': { agency: 'สสอ.บางบ่อ', class: 'agency-สสอ-บางบ่อ', fullName: 'สำนักงานสาธารณสุขอำเภอบางบ่อ' },
+                'C41': { agency: 'สสอ.บางบ่อ', class: 'agency-สสอ-บางบ่อ', fullName: 'สำนักงานสาธารณสุขอำเภอบางบ่อ' },
+                
+                'C47': { agency: 'สสอ.บางเสาธง', class: 'agency-สสอ-บางเสาธง', fullName: 'สำนักงานสาธารณสุขอำเภอบางเสาธง' },
+                'C53': { agency: 'สสอ.บางเสาธง', class: 'agency-สสอ-บางเสาธง', fullName: 'สำนักงานสาธารณสุขอำเภอบางเสาธง' },
+                'C59': { agency: 'สสอ.บางเสาธง', class: 'agency-สสอ-บางเสาธง', fullName: 'สำนักงานสาธารณสุขอำเภอบางเสาธง' },
+                
+                'C06': { agency: 'สสอ.เมืองสมุทรปราการ', class: 'agency-สสอ-เมือง', fullName: 'สำนักงานสาธารณสุขอำเภอเมืองสมุทรปราการ' },
+                'C12': { agency: 'สสอ.เมืองสมุทรปราการ', class: 'agency-สสอ-เมือง', fullName: 'สำนักงานสาธารณสุขอำเภอเมืองสมุทรปราการ' },
+                'C18': { agency: 'สสอ.เมืองสมุทรปราการ', class: 'agency-สสอ-เมือง', fullName: 'สำนักงานสาธารณสุขอำเภอเมืองสมุทรปราการ' },
+                'C24': { agency: 'สสอ.เมืองสมุทรปราการ', class: 'agency-สสอ-เมือง', fullName: 'สำนักงานสาธารณสุขอำเภอเมืองสมุทรปราการ' },
+                'C30': { agency: 'สสอ.เมืองสมุทรปราการ', class: 'agency-สสอ-เมือง', fullName: 'สำนักงานสาธารณสุขอำเภอเมืองสมุทรปราการ' },
+                'C36': { agency: 'สสอ.เมืองสมุทรปราการ', class: 'agency-สสอ-เมือง', fullName: 'สำนักงานสาธารณสุขอำเภอเมืองสมุทรปราการ' },
+                'C42': { agency: 'สสอ.เมืองสมุทรปราการ', class: 'agency-สสอ-เมือง', fullName: 'สำนักงานสาธารณสุขอำเภอเมืองสมุทรปราการ' },
+                
+                'C48': { agency: 'รพ.บางเสาธง', class: 'agency-รพ-บางเสาธง', fullName: 'โรงพยาบาลบางเสาธง' },
+                'C54': { agency: 'รพ.บางเสาธง', class: 'agency-รพ-บางเสาธง', fullName: 'โรงพยาบาลบางเสาธง' },
+                'C60': { agency: 'รพ.บางเสาธง', class: 'agency-รพ-บางเสาธง', fullName: 'โรงพยาบาลบางเสาธง' },
+                
+                'C27': { agency: 'สสอ.บางพลี', class: 'agency-สสอ-บางพลี', fullName: 'สำนักงานสาธารณสุขอำเภอบางพลี' },
+                'C33': { agency: 'สสอ.บางพลี', class: 'agency-สสอ-บางพลี', fullName: 'สำนักงานสาธารณสุขอำเภอบางพลี' },
+                'C39': { agency: 'สสอ.บางพลี', class: 'agency-สสอ-บางพลี', fullName: 'สำนักงานสาธารณสุขอำเภอบางพลี' },
+                
+                'C45': { agency: 'สสอ.พระสมุทรเจดีย์', class: 'agency-สสอ-พระสมุทรเจดีย์', fullName: 'สำนักงานสาธารณสุขอำเภอพระสมุทรเจดีย์' },
+                'C51': { agency: 'สสอ.พระสมุทรเจดีย์', class: 'agency-สสอ-พระสมุทรเจดีย์', fullName: 'สำนักงานสาธารณสุขอำเภอพระสมุทรเจดีย์' },
+                'C57': { agency: 'สสอ.พระสมุทรเจดีย์', class: 'agency-สสอ-พระสมุทรเจดีย์', fullName: 'สำนักงานสาธารณสุขอำเภอพระสมุทรเจดีย์' }
+            };
+            
+            let tableCounter = 1;
+            
+            container.innerHTML = ''; // Clear existing content
+            
+            for (let position = 0; position < 77; position++) {
+                const tableElement = document.createElement('div');
+                
+                if (spacerPositions.includes(position)) {
+                    tableElement.className = 'table-seat spacer';
+                    tableElement.innerHTML = '◦';
+                } else {
+                    const tableId = `C${tableCounter.toString().padStart(2, '0')}`;
+                    
+                    if (emptyTableIds.includes(tableId)) {
+                        tableElement.className = 'table-seat spacer';
+                        tableElement.innerHTML = '◦';
+                    } else {
+                        const assignment = tableAssignments[tableId];
+                        const availableSeats = getRandomAvailableSeats();
+                        
+                        tableElement.className = 'table-seat';
+                        
+                        // Apply agency filtering
+                        if (selectedAgency !== 'all') {
+                            if (assignment && assignment.agency === selectedAgency) {
+                                tableElement.classList.add('highlighted');
+                            } else {
+                                tableElement.classList.add('dimmed');
+                            }
+                        }
+                        
+                        if (assignment) {
+                            tableElement.classList.add(assignment.class);
+                            tableElement.title = `${tableId} - ${assignment.fullName}`;
+                        } else {
+                            tableElement.title = `${tableId} - โต๊ะทั่วไป`;
+                        }
+                        
+                        // Create 3-line content
+                        let agencyText = assignment ? assignment.agency : 'ทั่วไป';
+                        if (agencyText.length > 12) {
+                            agencyText = agencyText.substring(0, 10) + '...';
+                        }
+                        
+                        tableElement.innerHTML = `
+                            <div class="table-id">${tableId}</div>
+                            <div class="table-capacity">${availableSeats}/8</div>
+                            <div class="table-agency">${agencyText}</div>
+                        `;
+                        
+                        // Add click event for interaction
+                        tableElement.addEventListener('click', function() {
+                            showTableInfo(tableId, assignment, availableSeats);
+                        });
+                    }
+                    tableCounter++;
+                }
+                
+                container.appendChild(tableElement);
+            }
+        }
+
+        function toggleTableInfo() {
+            showDetailedInfo = !showDetailedInfo;
+            // You can add additional functionality here if needed
+            // For now, the new format is always shown
+        }
+
+        function showTableInfo(tableId, assignment, availableSeats) {
+            if (assignment) {
+                alert(`โต๊ะ: ${tableId}\nหน่วยงาน: ${assignment.fullName}\nที่นั่งว่าง: ${availableSeats} / 8`);
+            } else {
+                alert(`โต๊ะ: ${tableId}\nประเภท: โต๊ะทั่วไป\nที่นั่งว่าง: ${availableSeats} / 8`);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            generateTables();
+            
+            // Add some interactive effects
+            setTimeout(() => {
+                const tableSeats = document.querySelectorAll('.table-seat:not(.spacer)');
+                tableSeats.forEach(seat => {
+                    seat.addEventListener('mouseenter', function() {
+                        if (!this.classList.contains('dimmed')) {
+                            this.style.transform = 'translateY(-3px) scale(1.05)';
+                        }
+                    });
+                    
+                    seat.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    });
+                });
+            }, 100);
+        });
+
+        // Add smooth scrolling for better user experience
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
